@@ -5,7 +5,9 @@ defmodule PlugProxy do
 
   @methods ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
 
-  def init(opts), do: opts
+  def init(opts) do
+    opts
+  end
 
   def call(conn, opts) do
     case send_req(conn, opts) do
@@ -25,14 +27,41 @@ defmodule PlugProxy do
 
   defp send_req(conn, opts) do
     url_fun = Keyword.get(opts, :url, &format_url/1)
-    :hackney.request(method_atom(conn.method), url_fun.(conn), prepare_headers(conn), :stream, opts)
+    url = get_url(url_fun, conn)
+
+    :hackney.request(method_atom(conn.method), url, prepare_headers(conn), :stream, opts)
   end
 
-  def scheme(:http), do: "http"
-  def scheme(:https), do: "https"
-  def scheme(atom), do: Atom.to_string(atom)
+  defp scheme(str) when is_binary(str), do: str
+  defp scheme(:http), do: "http"
+  defp scheme(:https), do: "https"
+  defp scheme(atom) when is_atom(atom), do: Atom.to_string(atom)
 
-  def format_url(conn) do
+  defp get_url(fun, conn) when is_function(fun) do
+    fun.(conn)
+  end
+
+  defp get_url(url, conn) when is_binary(url) do
+    uri = URI.parse(url)
+    query = uri.query || ""
+    path = String.trim_trailing(uri.path || "", "/")
+
+    format_url(%{
+      scheme: uri.scheme || conn.scheme,
+      host: uri.host || conn.host,
+      port: uri.port || conn.port,
+      request_path: format_path(path, conn.request_path),
+      query_string: format_query_string(query, conn.query_string)
+    })
+  end
+
+  defp format_path(target, "/" <> path), do: format_path(target, path)
+  defp format_path(target, path), do: "#{target}/#{path}"
+
+  defp format_query_string("", query), do: query
+  defp format_query_string(target, query), do: "#{target}&#{query}"
+
+  defp format_url(conn) do
     "#{scheme conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}"
     |> append_query_string(conn.query_string)
   end

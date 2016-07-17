@@ -1,8 +1,104 @@
 defmodule PlugProxyTest do
-  use ExUnit.Case
-  doctest PlugProxy
+  use ExUnit.Case, async: true
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  defp proxy_url(mod) do
+    conf = Application.get_env(:plug_proxy, mod, [])
+    port = Keyword.get(conf, :port)
+
+    "http://localhost:#{port}"
+  end
+
+  defp request(), do: request([])
+
+  defp request(options) when is_list(options) do
+    request(PlugProxyTest.Proxy, options)
+  end
+
+  defp request(mod, options \\ []) when is_atom(mod) and is_list(options) do
+    method = Keyword.get(options, :method, :get)
+    path = Keyword.get(options, :path, "/")
+    headers = Keyword.get(options, :headers, [])
+    body = Keyword.get(options, :body, "")
+    url = proxy_url(mod)
+    {:ok, status, headers, client} = :hackney.request(method, url <> path, headers, body, options)
+
+    {status, headers, client}
+  end
+
+  test "get" do
+    {_, _, client} = request()
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "ok"
+  end
+
+  test "post" do
+    {_, _, client} = request(method: :post, path: "/submit", body: "test")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "test"
+  end
+
+  test "query string" do
+    query = "a=1&b=2"
+    {_, _, client} = request(path: "/query?#{query}")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == query
+  end
+
+  test "request header" do
+    header = "foooo"
+    {_, _, client} = request(path: "/header", headers: [
+      {"x-request-header", header}
+    ])
+    {:ok, body} = :hackney.body(client)
+
+    assert body == header
+  end
+
+  test "response header" do
+    {_, headers, _} = request(path: "/header")
+    {_, header} = List.keyfind(headers, "x-response-header", 0)
+
+    assert header == "response ok"
+  end
+
+  test "chunk" do
+    {_, headers, client} = request(path: "/chunk")
+    {:ok, body} = :hackney.body(client)
+    {_, header} = List.keyfind(headers, "transfer-encoding", 0)
+
+    assert body == "123"
+    assert header == "chunked"
+  end
+
+  test "run before_send plugs" do
+    {_, headers, _} = request()
+    {_, header} = List.keyfind(headers, "x-before-send", 0)
+
+    assert header == "before send"
+  end
+
+  test "not found" do
+    {status, _, client} = request(path: "/nothing")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "not found"
+    assert status == 404
+  end
+
+  test "append query string" do
+    {_, _, client} = request(path: "/f/query?c=3")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "a=1&c=3"
+  end
+
+  test "append path" do
+    {_, _, client} = request(path: "/f/path/b/c")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "/a/f/path/b/c"
   end
 end
