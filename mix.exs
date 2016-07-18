@@ -1,12 +1,22 @@
 defmodule PlugProxy.Mixfile do
   use Mix.Project
 
+  @version "0.1.0"
+  @github_link "https://github.com/tommy351/plug-proxy"
+
   def project do
     [app: :plug_proxy,
-     version: "0.1.0",
+     version: @version,
      elixir: "~> 1.2",
+     description: "A plug for reverse proxy server",
      elixirc_paths: elixirc_paths(Mix.env),
-     deps: deps()]
+     deps: deps(),
+     package: package(),
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: preferred_cli_env(),
+     docs: [extras: ["README.md"], main: "readme",
+            source_ref: @version,
+            source_url: @github_link]]
   end
 
   def application do
@@ -19,6 +29,24 @@ defmodule PlugProxy.Mixfile do
   defp deps do
     [{:cowboy, "~> 1.0"},
      {:plug, "~> 1.0"},
-     {:hackney, "~> 1.6"}]
+     {:hackney, "~> 1.6"},
+     {:ex_doc, "~> 0.12", only: :docs},
+     {:excoveralls, "~> 0.5", only: :test},
+     {:inch_ex, "~> 0.5", only: :docs}]
+  end
+
+  defp package do
+    [maintainers: ["Tommy Chen"],
+     licenses: ["MIT License"],
+     links: %{"GitHub" => @github_link}]
+  end
+
+  defp preferred_cli_env do
+    ["coveralls": :test,
+     "coveralls.travis": :test,
+     "docs": :docs,
+     "hex.docs": :docs,
+     "inchci.add": :docs,
+     "inchci.report": :docs]
   end
 end
