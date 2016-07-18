@@ -36,7 +36,7 @@ defmodule PlugProxy do
   defp parse_upstream(opts, upstream) when is_binary(upstream) do
     uri = URI.parse(upstream)
     uri = %{uri | query: uri.query || "",
-                  path: String.trim_trailing(uri.path || "", "/")}
+                  path: String.replace_trailing(uri.path || "", "/", "")}
 
     Keyword.put(opts, :upstream, uri)
   end

@@ -8,7 +8,7 @@ defmodule PlugProxyTest.Proxy do
   plug :dispatch
 
   get "/f/fun/:path" do
-    url_fun = fn conn, _ ->
+    url_fun = fn _, _ ->
       "http://localhost:4000/a/#{String.reverse path}"
     end
 
