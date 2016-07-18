@@ -2,6 +2,11 @@ language: elixir
 
 sudo: false
 
+cache:
+  directories:
+    - deps
+    - _build
+
 matrix:
   include:
     - otp_release: 18.3
