@@ -123,7 +123,7 @@ defmodule PlugProxy do
   end
 
   defp write_proxy(conn, client) do
-    case read_body(conn, [])  do
+    case read_body(conn, []) do
       {:ok, body, conn} ->
         :hackney.send_body(client, body)
         :hackney.finish_send_body(client)
@@ -134,7 +134,7 @@ defmodule PlugProxy do
         write_proxy(conn, client)
 
       {:error, :timeout} ->
-        raise GatewayTimeoutError
+        raise GatewayTimeoutError, reason: :write
 
       {:error, err} ->
         raise BadGatewayError, reason: err
@@ -150,7 +150,7 @@ defmodule PlugProxy do
         |> reply(client, headers, length)
 
       {:error, :timeout} ->
-        raise GatewayTimeoutError
+        raise GatewayTimeoutError, reason: :read
 
       err ->
         raise BadGatewayError, reason: err

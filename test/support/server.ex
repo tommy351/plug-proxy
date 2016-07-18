@@ -45,4 +45,9 @@ defmodule PlugProxyTest.Server do
   get "/a/*_path" do
     send_resp(conn, 200, conn.request_path)
   end
+
+  get "/e/timeout/read" do
+    Process.sleep(600)
+    send_resp(conn, 200, "ok")
+  end
 end

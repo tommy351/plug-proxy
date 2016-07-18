@@ -20,9 +20,11 @@ defmodule PlugProxyTest do
     headers = Keyword.get(options, :headers, [])
     body = Keyword.get(options, :body, "")
     url = proxy_url(mod)
-    {:ok, status, headers, client} = :hackney.request(method, url <> path, headers, body, options)
 
-    {status, headers, client}
+    case :hackney.request(method, url <> path, headers, body, options) do
+      {:ok, status, headers, client} -> {status, headers, client}
+      {:ok, client} -> client
+    end
   end
 
   test "get" do
@@ -114,5 +116,21 @@ defmodule PlugProxyTest do
     {:ok, body} = :hackney.body(client)
 
     assert body == "ok"
+  end
+
+  test "bad gateway - nxdomain" do
+    {status, _, client} = request(path: "/e/gateway")
+    {:ok, body} = :hackney.body(client)
+
+    assert status == 502
+    assert body == "nxdomain"
+  end
+
+  test "gateway timeout - read" do
+    {status, _, client} = request(path: "/e/timeout/read")
+    {:ok, body} = :hackney.body(client)
+
+    assert status == 504
+    assert body == "read"
   end
 end

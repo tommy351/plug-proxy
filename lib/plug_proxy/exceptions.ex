@@ -9,9 +9,9 @@ end
 
 defmodule PlugProxy.GatewayTimeoutError do
   @moduledoc false
-  defexception plug_status: 504
+  defexception reason: nil, plug_status: 504
 
-  def message(_exception) do
-    "gateway timeout"
+  def message(exception) do
+    "gateway timeout: #{exception.reason}"
   end
 end
