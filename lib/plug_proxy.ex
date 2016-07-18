@@ -1,15 +1,57 @@
 defmodule PlugProxy do
+  @moduledoc """
+  A plug for reverse proxy server.
+
+  PlugProxy pipeline the request to the upstream, and the response will be sent with
+  [ranch](https://github.com/ninenines/ranch) transport which is highly efficient.
+
+  ## Options
+
+    - `:upstream` - Upstream URL string. Additional path and query string will be prefixed.
+    - `:url` - URL string or a function which returns an URL
+
+  Additional options will be passed to hackney. You can see [:hackney.request/5](https://github.com/benoitc/hackney/blob/master/doc/hackney.md#request5)
+  for available options.
+
+  ## Examples
+
+  Forward requests to a upstream.
+
+      forward "/v2", to: PlugProxy, upstream: "http://example.com/"
+      \# http://localhost:4000/v2/test => http://example.com/v2/test
+
+      forward "/v2", to: PlugProxy, upstream: "http://example.com/abc/"
+      \# http://localhost:4000/v2/test => http://example.com/abc/v2/test
+
+      forward "/v2", to: PlugProxy, upstream: "http://example.com?a=1"
+      \# http://localhost:4000/v2/test?b=2 => http://example.com/v2/test?a=1&b=2
+
+  Return URL in a function.
+
+      get "/v2/:id", do
+        url_fun = fn conn, opts ->
+          "http://example.com/a/" <> String.reverse(id)
+        end
+
+        opts = PlugProxy.init(url: url_fun)
+        PlugProxy.call(conn, opts)
+      end
+      \# http://localhost:4000/v2/123 => http://example.com/a/321
+  """
+
   import Plug.Conn, only: [read_body: 2]
   alias PlugProxy.BadGatewayError
   alias PlugProxy.GatewayTimeoutError
 
   @methods ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
 
+  @doc false
   def init(opts) do
     opts
     |> parse_upstream(Keyword.get(opts, :upstream))
   end
 
+  @doc false
   def call(conn, opts) do
     case send_req(conn, opts) do
       {:ok, client} ->

@@ -14,7 +14,7 @@ defmodule PlugProxy.Mixfile do
      package: package(),
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: preferred_cli_env(),
-     docs: [extras: ["README.md"], main: "readme",
+     docs: [main: "PlugProxy",
             source_ref: @version,
             source_url: @github_link]]
   end
