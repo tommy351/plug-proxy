@@ -33,10 +33,6 @@ defmodule PlugProxy do
     :hackney.request(method_atom(conn.method), url, prepare_headers(conn), :stream, opts)
   end
 
-  defp parse_upstream(opts, %URI{}) do
-    opts
-  end
-
   defp parse_upstream(opts, upstream) when is_binary(upstream) do
     uri = URI.parse(upstream)
     uri = %{uri | query: uri.query || "",
@@ -44,6 +40,8 @@ defmodule PlugProxy do
 
     Keyword.put(opts, :upstream, uri)
   end
+
+  defp parse_upstream(opts, _), do: opts
 
   defp format_url(conn, opts) do
     upstream = Keyword.get(opts, :upstream)

@@ -101,4 +101,11 @@ defmodule PlugProxyTest do
 
     assert body == "/a/f/path/b/c"
   end
+
+  test "url function" do
+    {_, _, client} = request(path: "/f/fun/abc")
+    {:ok, body} = :hackney.body(client)
+
+    assert body == "/a/cba"
+  end
 end

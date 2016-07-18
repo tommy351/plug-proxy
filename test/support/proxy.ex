@@ -7,6 +7,15 @@ defmodule PlugProxyTest.Proxy do
   plug :match
   plug :dispatch
 
+  get "/f/fun/:path" do
+    url_fun = fn conn, _ ->
+      "http://localhost:4000/a/#{String.reverse path}"
+    end
+
+    opts = PlugProxy.init(url: url_fun)
+    PlugProxy.call(conn, opts)
+  end
+
   forward "/f/query", to: PlugProxy, upstream: "http://localhost:4000?a=1"
   forward "/f/path",  to: PlugProxy, upstream: "http://localhost:4000/a/"
   forward "/",        to: PlugProxy, upstream: "http://localhost:4000"
