@@ -28,7 +28,7 @@ defmodule PlugProxy do
 
   defp send_req(conn, opts) do
     url_fun = Keyword.get(opts, :url, &format_url/2)
-    url = url_fun.(conn, opts)
+    url = get_url(url_fun, conn, opts)
 
     :hackney.request(method_atom(conn.method), url, prepare_headers(conn), :stream, opts)
   end
@@ -42,6 +42,12 @@ defmodule PlugProxy do
   end
 
   defp parse_upstream(opts, _), do: opts
+
+  defp get_url(url, conn, opts) when is_function(url) do
+    url.(conn, opts)
+  end
+
+  defp get_url(url, _, _), do: url
 
   defp format_url(conn, opts) do
     upstream = Keyword.get(opts, :upstream)
