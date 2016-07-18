@@ -47,7 +47,7 @@ defmodule PlugProxyTest.Server do
   end
 
   get "/e/timeout/read" do
-    Process.sleep(600)
+    :timer.sleep(600)
     send_resp(conn, 200, "ok")
   end
 end
