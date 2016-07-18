@@ -7,6 +7,7 @@ defmodule PlugProxy do
 
   def init(opts) do
     opts
+    |> parse_upstream(Keyword.get(opts, :upstream))
   end
 
   def call(conn, opts) do
@@ -26,45 +27,47 @@ defmodule PlugProxy do
   end
 
   defp send_req(conn, opts) do
-    url_fun = Keyword.get(opts, :url, &format_url/1)
-    url = get_url(url_fun, conn)
+    url_fun = Keyword.get(opts, :url, &format_url/2)
+    url = url_fun.(conn, opts)
 
     :hackney.request(method_atom(conn.method), url, prepare_headers(conn), :stream, opts)
   end
 
-  defp scheme(str) when is_binary(str), do: str
-  defp scheme(:http), do: "http"
-  defp scheme(:https), do: "https"
-  defp scheme(atom) when is_atom(atom), do: Atom.to_string(atom)
-
-  defp get_url(fun, conn) when is_function(fun) do
-    fun.(conn)
+  defp parse_upstream(opts, %URI{}) do
+    opts
   end
 
-  defp get_url(url, conn) when is_binary(url) do
-    uri = URI.parse(url)
-    query = uri.query || ""
-    path = String.trim_trailing(uri.path || "", "/")
+  defp parse_upstream(opts, upstream) when is_binary(upstream) do
+    uri = URI.parse(upstream)
+    uri = %{uri | query: uri.query || "",
+                  path: String.trim_trailing(uri.path || "", "/")}
 
-    format_url(%{
-      scheme: uri.scheme || conn.scheme,
-      host: uri.host || conn.host,
-      port: uri.port || conn.port,
-      request_path: format_path(path, conn.request_path),
-      query_string: format_query_string(query, conn.query_string)
-    })
+    Keyword.put(opts, :upstream, uri)
   end
+
+  defp format_url(conn, opts) do
+    upstream = Keyword.get(opts, :upstream)
+    scheme = scheme_str(upstream.scheme || conn.scheme)
+    host = upstream.host || conn.host
+    port = upstream.port || conn.port
+    path = format_path(upstream.path, conn.request_path)
+    query = format_query_string(upstream.query, conn.query_string)
+
+    "#{scheme}://#{host}:#{port}#{path}"
+    |> append_query_string(query)
+  end
+
+  for scheme <- [:http, :https] do
+    defp scheme_str(unquote(scheme)), do: unquote(Atom.to_string(scheme))
+  end
+
+  defp scheme_str(scheme), do: to_string(scheme)
 
   defp format_path(target, "/" <> path), do: format_path(target, path)
   defp format_path(target, path), do: "#{target}/#{path}"
 
   defp format_query_string("", query), do: query
   defp format_query_string(target, query), do: "#{target}&#{query}"
-
-  defp format_url(conn) do
-    "#{scheme conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}"
-    |> append_query_string(conn.query_string)
-  end
 
   defp append_query_string(url, ""), do: url
   defp append_query_string(url, query_string), do: "#{url}?#{query_string}"

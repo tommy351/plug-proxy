@@ -7,9 +7,9 @@ defmodule PlugProxyTest.Proxy do
   plug :match
   plug :dispatch
 
-  forward "/f/query", to: PlugProxy, url: "http://localhost:4000?a=1"
-  forward "/f/path", to: PlugProxy, url: "http://localhost:4000/a/"
-  forward "/", to: PlugProxy, url: "http://localhost:4000"
+  forward "/f/query", to: PlugProxy, upstream: "http://localhost:4000?a=1"
+  forward "/f/path",  to: PlugProxy, upstream: "http://localhost:4000/a/"
+  forward "/",        to: PlugProxy, upstream: "http://localhost:4000"
 
   defp before_send(conn, _) do
     register_before_send(conn, fn conn ->

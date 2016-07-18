@@ -1,10 +1,12 @@
 # PlugProxy
 
-**TODO: Add description**
+[![Build Status](https://travis-ci.org/tommy351/plug-proxy.svg?branch=master)](https://travis-ci.org/tommy351/plug-proxy) [![Hex pm](https://img.shields.io/hexpm/v/plug-proxy.svg?style=flat)](https://hex.pm/packages/plug-proxy) [![Coverage Status](https://coveralls.io/repos/tommy351/plug-proxy/badge.svg?branch=master)](https://coveralls.io/r/tommy351/plug-proxy?branch=master) [![Inline docs](https://inch-ci.org/github/tommy351/plug-proxy.svg)](http://inch-ci.org/github/tommy351/plug-proxy)
+
+A plug for reverse proxy server.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
+Add plug_proxy to `mix.exs` dependencies.
 
   1. Add `plug_proxy` to your list of dependencies in `mix.exs`:
 
@@ -22,3 +24,6 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
+## Usage
+
+TODO
