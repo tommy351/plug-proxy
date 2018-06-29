@@ -131,9 +131,8 @@ defmodule PlugProxy.Transport.Cowboy do
   end
 
   defp before_send(%Plug.Conn{before_send: before_send} = conn, headers, state) do
+    conn = %{conn | resp_headers: headers}
     conn = Enum.reduce(before_send, conn, & &1.(&2))
-    %Plug.Conn{resp_headers: resp_headers} = conn
-    headers = resp_headers ++ headers
-    %{conn | resp_headers: headers, state: state}
+    %{conn | state: state}
   end
 end
