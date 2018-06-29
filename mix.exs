@@ -5,18 +5,18 @@ defmodule PlugProxy.Mixfile do
   @github_link "https://github.com/tommy351/plug-proxy"
 
   def project do
-    [app: :plug_proxy,
-     version: @version,
-     elixir: "~> 1.2",
-     description: "A plug for reverse proxy server",
-     elixirc_paths: elixirc_paths(Mix.env),
-     deps: deps(),
-     package: package(),
-     test_coverage: [tool: ExCoveralls],
-     preferred_cli_env: preferred_cli_env(),
-     docs: [main: "PlugProxy",
-            source_ref: @version,
-            source_url: @github_link]]
+    [
+      app: :plug_proxy,
+      version: @version,
+      elixir: "~> 1.6",
+      description: "A plug for reverse proxy server",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      deps: deps(),
+      package: package(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: preferred_cli_env(),
+      docs: [main: "PlugProxy", source_ref: @version, source_url: @github_link]
+    ]
   end
 
   def application do
@@ -24,29 +24,31 @@ defmodule PlugProxy.Mixfile do
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_),     do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-    [{:cowboy, "~> 1.0"},
-     {:plug, "~> 1.0"},
-     {:hackney, "~> 1.6"},
-     {:ex_doc, "~> 0.12", only: :docs},
-     {:excoveralls, "~> 0.5", only: :test},
-     {:inch_ex, "~> 0.5", only: :docs}]
+    [
+      {:cowboy, "~> 1.0"},
+      {:plug, "~> 1.5.0"},
+      {:hackney, "~> 1.10"},
+      {:ex_doc, "~> 0.18", only: :docs},
+      {:excoveralls, "~> 0.7", only: :test},
+      {:inch_ex, "~> 0.5", only: :docs}
+    ]
   end
 
   defp package do
-    [maintainers: ["Tommy Chen"],
-     licenses: ["MIT License"],
-     links: %{"GitHub" => @github_link}]
+    [maintainers: ["Tommy Chen"], licenses: ["MIT License"], links: %{"GitHub" => @github_link}]
   end
 
   defp preferred_cli_env do
-    ["coveralls": :test,
-     "coveralls.travis": :test,
-     "docs": :docs,
-     "hex.docs": :docs,
-     "inchci.add": :docs,
-     "inchci.report": :docs]
+    [
+      coveralls: :test,
+      "coveralls.travis": :test,
+      docs: :docs,
+      "hex.docs": :docs,
+      "inchci.add": :docs,
+      "inchci.report": :docs
+    ]
   end
 end

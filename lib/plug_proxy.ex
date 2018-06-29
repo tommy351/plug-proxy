@@ -65,7 +65,8 @@ defmodule PlugProxy do
   end
 
   for method <- @methods do
-    defp method_atom(unquote(method)), do: unquote(method |> String.downcase |> String.to_atom)
+    defp method_atom(unquote(method)),
+      do: unquote(method |> String.downcase() |> String.to_atom())
   end
 
   defp send_req(conn, opts) do
@@ -77,8 +78,7 @@ defmodule PlugProxy do
 
   defp parse_upstream(opts, upstream) when is_binary(upstream) do
     uri = URI.parse(upstream)
-    uri = %{uri | query: uri.query || "",
-                  path: String.replace_trailing(uri.path || "", "/", "")}
+    uri = %{uri | query: uri.query || "", path: String.replace_trailing(uri.path || "", "/", "")}
 
     Keyword.put(opts, :upstream, uri)
   end
