@@ -51,9 +51,15 @@ defmodule PlugProxyTest do
 
   test "request header" do
     header = "foooo"
-    {_, _, client} = request(path: "/header", headers: [
-      {"x-request-header", header}
-    ])
+
+    {_, _, client} =
+      request(
+        path: "/header",
+        headers: [
+          {"x-request-header", header}
+        ]
+      )
+
     {:ok, body} = :hackney.body(client)
 
     assert body == header
