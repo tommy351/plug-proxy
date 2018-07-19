@@ -6,23 +6,13 @@ A plug for reverse proxy server.
 
 ## Installation
 
-Add plug_proxy to `mix.exs` dependencies.
+Add plug_proxy to `mix.exs` and run `mix deps.get` to fetch the dependencies.
 
-  1. Add `plug_proxy` to your list of dependencies in `mix.exs`:
-
-    ```elixir
-    def deps do
-      [{:plug_proxy, "~> 0.3.0"}]
-    end
-    ```
-
-  2. Ensure `plug_proxy` is started before your application:
-
-    ```elixir
-    def application do
-      [applications: [:plug_proxy]]
-    end
-    ```
+```elixir
+def deps do
+  [{:plug_proxy, "~> 0.3.0"}]
+end
+```
 
 ## Usage
 
