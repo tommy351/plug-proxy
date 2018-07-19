@@ -31,9 +31,9 @@ defmodule PlugProxy.Mixfile do
       {:cowboy, "~> 1.0"},
       {:plug, "~> 1.5.0"},
       {:hackney, "~> 1.10"},
-      {:ex_doc, "~> 0.18", only: :docs},
+      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
       {:excoveralls, "~> 0.7", only: :test},
-      {:inch_ex, "~> 0.5", only: :docs}
+      {:inch_ex, "~> 0.5", only: [:dev, :test]}
     ]
   end
 
@@ -44,11 +44,7 @@ defmodule PlugProxy.Mixfile do
   defp preferred_cli_env do
     [
       coveralls: :test,
-      "coveralls.travis": :test,
-      docs: :docs,
-      "hex.docs": :docs,
-      "inchci.add": :docs,
-      "inchci.report": :docs
+      "coveralls.travis": :test
     ]
   end
 end
