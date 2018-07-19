@@ -1,7 +1,7 @@
 defmodule PlugProxy.Mixfile do
   use Mix.Project
 
-  @version "0.3.0"
+  @version "0.3.1"
   @github_link "https://github.com/tommy351/plug-proxy"
 
   def project do
