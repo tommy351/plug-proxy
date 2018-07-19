@@ -35,8 +35,8 @@ defmodule PlugProxy.Transport do
       end
   """
 
-  @type conn :: Plug.Conn.t
-  @type client :: :hackney.client_ref
+  @type conn :: Plug.Conn.t()
+  @type client :: :hackney.client_ref()
   @type opts :: term
 
   @callback write(conn, client, term) :: conn

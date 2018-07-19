@@ -57,10 +57,11 @@ defmodule PlugProxy.Transport.Cowboy do
   end
 
   defp process_headers("content-length", value, headers, acc, length) do
-    length = case Integer.parse(value) do
-      {int, ""} -> int
-      _ -> length
-    end
+    length =
+      case Integer.parse(value) do
+        {int, ""} -> int
+        _ -> length
+      end
 
     process_headers(headers, acc, length)
   end
@@ -82,13 +83,20 @@ defmodule PlugProxy.Transport.Cowboy do
   end
 
   defp reply(conn, client, headers, length) do
-    body_fun = fn(socket, transport) ->
+    body_fun = fn socket, transport ->
       stream_reply(conn, client, socket, transport)
     end
 
     conn = before_send(conn, headers, :set)
     {adapter, req} = conn.adapter
-    {:ok, req} = :cowboy_req.reply(conn.status, conn.resp_headers, :cowboy_req.set_resp_body_fun(length, body_fun, req))
+
+    {:ok, req} =
+      :cowboy_req.reply(
+        conn.status,
+        conn.resp_headers,
+        :cowboy_req.set_resp_body_fun(length, body_fun, req)
+      )
+
     %{conn | adapter: {adapter, req}, state: :sent}
   end
 
@@ -123,7 +131,8 @@ defmodule PlugProxy.Transport.Cowboy do
   end
 
   defp before_send(%Plug.Conn{before_send: before_send} = conn, headers, state) do
-    conn = %{conn | resp_headers: headers, state: state}
-    Enum.reduce(before_send, conn, &(&1.(&2)))
+    conn = %{conn | resp_headers: headers}
+    conn = Enum.reduce(before_send, conn, & &1.(&2))
+    %{conn | state: state}
   end
 end
