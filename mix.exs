@@ -29,7 +29,7 @@ defmodule PlugProxy.Mixfile do
   defp deps do
     [
       {:cowboy, "~> 1.0"},
-      {:plug, "~> 1.5.0"},
+      {:plug, "~> 1.5"},
       {:hackney, "~> 1.10"},
       {:ex_doc, "~> 0.18", only: :dev, runtime: false},
       {:excoveralls, "~> 0.7", only: :test},
