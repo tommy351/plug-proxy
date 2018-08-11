@@ -6,9 +6,9 @@ defmodule PlugProxy.Transport.Cowboy do
   @behaviour PlugProxy.Transport
 
   import Plug.Conn, only: [read_body: 2]
-  alias PlugProxy.BadGatewayError
-  alias PlugProxy.GatewayTimeoutError
+  alias PlugProxy.{BadGatewayError, GatewayTimeoutError}
 
+  @impl true
   def write(conn, client, opts) do
     case read_body(conn, []) do
       {:ok, body, conn} ->
@@ -28,6 +28,7 @@ defmodule PlugProxy.Transport.Cowboy do
     end
   end
 
+  @impl true
   def read(conn, client, _) do
     case :hackney.start_response(client) do
       {:ok, status, headers, client} ->

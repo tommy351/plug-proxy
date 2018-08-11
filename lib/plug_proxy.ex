@@ -46,11 +46,13 @@ defmodule PlugProxy do
 
   @methods ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
 
+  @impl true
   def init(opts) do
     opts
     |> parse_upstream(Keyword.get(opts, :upstream))
   end
 
+  @impl true
   def call(conn, opts) do
     transport = Keyword.get(opts, :transport, PlugProxy.Transport.Cowboy)
 

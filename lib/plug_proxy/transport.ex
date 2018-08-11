@@ -4,8 +4,8 @@ defmodule PlugProxy.Transport do
 
   A transport module must export the following functions:
 
-  - a `write/3` function writes the request to the upstream.
-  - a `read/3` function reads the response from the upstream and send it to the client.
+  - a `c:write/3` function writes the request to the upstream.
+  - a `c:read/3` function reads the response from the upstream and send it to the client.
 
   ## Examples
 
@@ -39,6 +39,6 @@ defmodule PlugProxy.Transport do
   @type client :: :hackney.client_ref()
   @type opts :: term
 
-  @callback write(conn, client, term) :: conn
-  @callback read(conn, client, term) :: conn
+  @callback write(conn, client, opts) :: conn
+  @callback read(conn, client, opts) :: conn
 end
