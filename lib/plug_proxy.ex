@@ -54,7 +54,13 @@ defmodule PlugProxy do
 
   @impl true
   def call(conn, opts) do
-    transport = Keyword.get(opts, :transport, PlugProxy.Transport.Cowboy)
+    transport =
+      Keyword.get_lazy(opts, :transport, fn ->
+        case conn.adapter do
+          {Plug.Adapters.Cowboy2.Conn, _} -> PlugProxy.Transport.Cowboy2
+          _ -> PlugProxy.Transport.Cowboy
+        end
+      end)
 
     case send_req(conn, opts) do
       {:ok, client} ->

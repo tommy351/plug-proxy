@@ -6,6 +6,7 @@ defmodule PlugProxy.Transport.Cowboy do
   @behaviour PlugProxy.Transport
 
   import Plug.Conn, only: [read_body: 2]
+  import PlugProxy.Response
   alias PlugProxy.{BadGatewayError, GatewayTimeoutError}
 
   @impl true
@@ -43,36 +44,6 @@ defmodule PlugProxy.Transport.Cowboy do
       err ->
         raise BadGatewayError, reason: err
     end
-  end
-
-  defp process_headers(headers) do
-    process_headers(headers, [], 0)
-  end
-
-  defp process_headers([], acc, length) do
-    {Enum.reverse(acc), length}
-  end
-
-  defp process_headers([{key, value} | tail], acc, length) do
-    process_headers(String.downcase(key), value, tail, acc, length)
-  end
-
-  defp process_headers("content-length", value, headers, acc, length) do
-    length =
-      case Integer.parse(value) do
-        {int, ""} -> int
-        _ -> length
-      end
-
-    process_headers(headers, acc, length)
-  end
-
-  defp process_headers("transfer-encoding", "chunked", headers, acc, _) do
-    process_headers(headers, acc, :chunked)
-  end
-
-  defp process_headers(key, value, headers, acc, length) do
-    process_headers(headers, [{key, value} | acc], length)
   end
 
   defp reply(conn, client, headers, :chunked) do
@@ -129,11 +100,5 @@ defmodule PlugProxy.Transport.Cowboy do
         # TODO: error handling
         :ok
     end
-  end
-
-  defp before_send(%Plug.Conn{before_send: before_send} = conn, headers, state) do
-    conn = %{conn | resp_headers: headers}
-    conn = Enum.reduce(before_send, conn, & &1.(&2))
-    %{conn | state: state}
   end
 end
