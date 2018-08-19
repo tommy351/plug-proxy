@@ -1,14 +1,19 @@
 language: elixir
 sudo: false
-elixir: 1.6.1
-otp_release: 20.1
+elixir:
+  - 1.6
+  - 1.7
+otp_release:
+  - 20.3
+  - 21.0
+env:
+  matrix:
+    - COWBOY_VERSION=1.0
+    - COWBOY_VERSION=2.0
 cache:
   directories:
     - deps
     - _build
-env:
-  - COWBOY_VERSION=1.0
-  - COWBOY_VERSION=2.0
 script:
   - mix format --check-formatted
   - mix coveralls.travis
