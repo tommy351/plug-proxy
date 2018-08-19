@@ -10,7 +10,7 @@ Add plug_proxy to `mix.exs` and run `mix deps.get` to fetch the dependencies.
 
 ```elixir
 def deps do
-  [{:plug_proxy, "~> 0.3.1"}]
+  [{:plug_proxy, "~> 0.4.0"}]
 end
 ```
 
