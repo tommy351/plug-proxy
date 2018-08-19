@@ -3,31 +3,9 @@ defmodule PlugProxy.Transport.Cowboy do
   A transport module using Cowboy.
   """
 
-  @behaviour PlugProxy.Transport
-
-  import Plug.Conn, only: [read_body: 2]
+  use PlugProxy.Transport
   import PlugProxy.Response
   alias PlugProxy.{BadGatewayError, GatewayTimeoutError}
-
-  @impl true
-  def write(conn, client, opts) do
-    case read_body(conn, []) do
-      {:ok, body, conn} ->
-        :hackney.send_body(client, body)
-        :hackney.finish_send_body(client)
-        conn
-
-      {:more, body, conn} ->
-        :hackney.send_body(client, body)
-        write(conn, client, opts)
-
-      {:error, :timeout} ->
-        raise GatewayTimeoutError, reason: :write
-
-      {:error, err} ->
-        raise BadGatewayError, reason: err
-    end
-  end
 
   @impl true
   def read(conn, client, _) do

@@ -54,13 +54,7 @@ defmodule PlugProxy do
 
   @impl true
   def call(conn, opts) do
-    transport =
-      Keyword.get_lazy(opts, :transport, fn ->
-        case conn.adapter do
-          {Plug.Adapters.Cowboy2.Conn, _} -> PlugProxy.Transport.Cowboy2
-          _ -> PlugProxy.Transport.Cowboy
-        end
-      end)
+    transport = Keyword.get_lazy(opts, :transport, fn -> default_transport(conn) end)
 
     case send_req(conn, opts) do
       {:ok, client} ->
@@ -75,6 +69,18 @@ defmodule PlugProxy do
   for method <- @methods do
     defp method_atom(unquote(method)),
       do: unquote(method |> String.downcase() |> String.to_atom())
+  end
+
+  defp default_transport(%Plug.Conn{adapter: {Plug.Adapters.Cowboy2.Conn, _}}) do
+    PlugProxy.Transport.Cowboy2
+  end
+
+  defp default_transport(%Plug.Conn{adapter: {Plug.Adapters.Cowboy.Conn, _}}) do
+    PlugProxy.Transport.Cowboy
+  end
+
+  defp default_transport(_) do
+    PlugProxy.Transport.Common
   end
 
   defp send_req(conn, opts) do
