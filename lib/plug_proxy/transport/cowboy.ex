@@ -4,7 +4,7 @@ defmodule PlugProxy.Transport.Cowboy do
   """
 
   use PlugProxy.Transport
-  import PlugProxy.Response
+  import PlugProxy.Response, only: [process_headers: 1, chunked_reply: 2, before_send: 2]
   alias PlugProxy.{BadGatewayError, GatewayTimeoutError}
 
   @impl true
@@ -13,8 +13,8 @@ defmodule PlugProxy.Transport.Cowboy do
       {:ok, status, headers, client} ->
         {headers, length} = process_headers(headers)
 
-        %{conn | status: status}
-        |> reply(client, headers, length)
+        %{conn | status: status, resp_headers: headers}
+        |> reply(client, length)
 
       {:error, :timeout} ->
         raise GatewayTimeoutError, reason: :read
@@ -24,20 +24,16 @@ defmodule PlugProxy.Transport.Cowboy do
     end
   end
 
-  defp reply(conn, client, headers, :chunked) do
-    conn = before_send(conn, headers, :chunked)
-    {adapter, req} = conn.adapter
-    {:ok, req} = :cowboy_req.chunked_reply(conn.status, conn.resp_headers, req)
-    chunked_reply(conn, client, req)
-    %{conn | adapter: {adapter, req}}
+  defp reply(conn, client, :chunked) do
+    chunked_reply(conn, client)
   end
 
-  defp reply(conn, client, headers, length) do
+  defp reply(conn, client, length) do
     body_fun = fn socket, transport ->
       stream_reply(conn, client, socket, transport)
     end
 
-    conn = before_send(conn, headers, :set)
+    conn = before_send(conn, :set)
     {adapter, req} = conn.adapter
 
     {:ok, req} =
@@ -48,21 +44,6 @@ defmodule PlugProxy.Transport.Cowboy do
       )
 
     %{conn | adapter: {adapter, req}, state: :sent}
-  end
-
-  defp chunked_reply(conn, client, req) do
-    case :hackney.stream_body(client) do
-      {:ok, data} ->
-        :cowboy_req.chunk(data, req)
-        chunked_reply(conn, client, req)
-
-      :done ->
-        :ok
-
-      {:error, _reason} ->
-        # TODO: error handling
-        :ok
-    end
   end
 
   defp stream_reply(conn, client, socket, transport) do

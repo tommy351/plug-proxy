@@ -64,6 +64,9 @@ defmodule PlugProxy.Transport do
 
           {:error, err} ->
             raise PlugProxy.BadGatewayError, reason: err
+
+          err ->
+            raise PlugProxy.BadGatewayError, reason: err
         end
       end
 
@@ -72,46 +75,20 @@ defmodule PlugProxy.Transport do
         case :hackney.start_response(client) do
           {:ok, status, headers, client} ->
             {headers, length} = PlugProxy.Response.process_headers(headers)
+            conn = %{conn | status: status, resp_headers: headers}
 
-            %{conn | status: status, resp_headers: headers}
-            |> reply(client, length)
+            case length do
+              :chunked -> PlugProxy.Response.chunked_reply(conn, client)
+              _ -> PlugProxy.Response.reply(conn, client)
+            end
 
           {:error, :timeout} ->
             raise PlugProxy.GatewayTimeoutError, reason: :read
+
+          {:error, err} ->
+            raise PlugProxy.BadGatewayError, reason: err
 
           err ->
-            raise PlugProxy.BadGatewayError, reason: err
-        end
-      end
-
-      defp reply(conn, client, :chunked) do
-        Plug.Conn.send_chunked(conn, conn.status)
-        |> chunked_reply(client)
-      end
-
-      defp reply(conn, client, _length) do
-        case :hackney.body(client) do
-          {:ok, body} ->
-            Plug.Conn.send_resp(conn, conn.status, body)
-
-          {:error, :timeout} ->
-            raise PlugProxy.GatewayTimeoutError, reason: :read
-
-          {:error, err} ->
-            raise PlugProxy.BadGatewayError, reason: err
-        end
-      end
-
-      defp chunked_reply(conn, client) do
-        case :hackney.stream_body(client) do
-          {:ok, data} ->
-            {:ok, conn} = Plug.Conn.chunk(conn, data)
-            chunked_reply(conn, client)
-
-          :done ->
-            conn
-
-          {:error, err} ->
             raise PlugProxy.BadGatewayError, reason: err
         end
       end

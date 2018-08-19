@@ -39,7 +39,7 @@ defmodule PlugProxy.Mixfile do
       {:cowboy, "~> 1.0 or ~> 2.4"},
       {:plug, "~> 1.5"},
       {:hackney, "~> 1.10"},
-      {:ex_doc, "~> 0.18", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.7", only: :test},
       {:inch_ex, "~> 0.5", only: [:dev, :test]}
     ]

@@ -9,7 +9,7 @@ defmodule PlugProxy do
 
     - `:upstream` - Upstream URL string. Additional path and query string will be prefixed.
     - `:url` - URL string or a function which returns an URL.
-    - `:transport` - Transport module. Default to `PlugProxy.Transport.Cowboy`.
+    - `:transport` - Transport module. Default to `PlugProxy.Transport.Common`.
 
   Additional options will be passed to hackney. You can see [:hackney.request/5](https://github.com/benoitc/hackney/blob/master/doc/hackney.md#request5)
   for available options.
@@ -69,10 +69,6 @@ defmodule PlugProxy do
   for method <- @methods do
     defp method_atom(unquote(method)),
       do: unquote(method |> String.downcase() |> String.to_atom())
-  end
-
-  defp default_transport(%Plug.Conn{adapter: {Plug.Adapters.Cowboy2.Conn, _}}) do
-    PlugProxy.Transport.Cowboy2
   end
 
   defp default_transport(%Plug.Conn{adapter: {Plug.Adapters.Cowboy.Conn, _}}) do
