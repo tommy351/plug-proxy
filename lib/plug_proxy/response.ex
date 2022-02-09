@@ -42,7 +42,7 @@ defmodule PlugProxy.Response do
   Run all before_send callbacks and set the connection state.
   """
   @spec before_send(Plug.Conn.t(), term) :: Plug.Conn.t()
-  def before_send(%Plug.Conn{before_send: before_send} = conn, state) do
+  def before_send(%Plug.Conn{private: %{before_send: before_send}} = conn, state) do
     conn = Enum.reduce(before_send, conn, & &1.(&2))
     %{conn | state: state}
   end
