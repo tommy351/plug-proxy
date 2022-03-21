@@ -1,7 +1,7 @@
 defmodule PlugProxy.Mixfile do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.0"
   @github_link "https://github.com/tommy351/plug-proxy"
 
   def project do
@@ -34,8 +34,8 @@ defmodule PlugProxy.Mixfile do
 
   defp deps do
     [
-      {:cowboy, "~> 1.0 or ~> 2.4"},
-      {:plug, "~> 1.5"},
+      {:plug, "~> 1.13.0"},
+      {:plug_cowboy, "~> 2.0"},
       {:hackney, "~> 1.10"},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false},
       {:excoveralls, "~> 0.7", only: :test, runtime: false},
